@@ -1,7 +1,12 @@
 add_subdirectory(extern)
-add_executable(tests test.cpp)
-target_link_libraries(tests PRIVATE GTest::gtest_main matrix)
-target_include_directories(tests PRIVATE ${PROJECT_SOURCE_DIR}/include)
+set(TEST_SOURCES
+  Punto.cpp
+  Vector.cpp
+  Poligono.cpp
+)
+
+add_executable(tests ${TEST_SOURCES})
+target_link_libraries(tests PRIVATE GTest::gtest_main geometria)
 
 include(GoogleTest)
 gtest_discover_tests(tests)

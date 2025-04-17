@@ -34,9 +34,11 @@ public:
   Punto<T> operator+(const Punto<T> &p) {
     return Punto(x + p.x, y + p.y, z + p.z);
   }
-  Punto<T> operator*(T scalar) const { return Punto(scalar * x, scalar * y); }
+  Punto<T> operator*(T scalar) const {
+    return Punto(scalar * x, scalar * y, scalar * z);
+  }
   friend Punto<T> operator*(T scalar, const Punto<T> &p) { return p * scalar; }
-  bool operator==(const Punto<T> &p) {
+  bool operator==(const Punto<T> &p) const {
     return (x == p.x) && (y == p.y) && (z == p.z);
   }
   friend std::ostream &operator<<(std::ostream &os, const Punto<T> &p) {

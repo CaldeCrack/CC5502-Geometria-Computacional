@@ -1,6 +1,9 @@
-add_library(punto STATIC Punto.cpp)
-add_library(vector STATIC Vector.cpp)
+add_library(geometria STATIC
+  Punto.cpp
+  Vector.cpp
+  Poligono.cpp
+)
 
 add_executable(main main.cpp)
-target_link_libraries(main punto vector)
+target_link_libraries(main geometria)
 

@@ -2,7 +2,7 @@
 
 template <typename T> class Vector {
 private:
-  Punto<double> origin;
+  Punto<T> origin;
   Punto<T> c;
 
 public:
@@ -24,7 +24,7 @@ public:
 
   // Overload operators
   Vector<T> operator+(const Vector<T> &v) { return Vector(c + v.c); }
-  bool operator==(const Vector<T> &v) { return c == v.c; }
+  bool operator==(const Vector<T> &v) const { return c == v.c; }
   Vector<T> operator*(T scalar) const { return Vector(scalar * c); }
   friend Vector<T> operator*(T scalar, const Vector<T> &v) {
     return v * scalar;
