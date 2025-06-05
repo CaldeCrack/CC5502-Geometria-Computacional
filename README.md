@@ -1,1 +1,2 @@
-# CC5502-Geometria-Computacional
+# [CC5502] Geometria Computacional
+

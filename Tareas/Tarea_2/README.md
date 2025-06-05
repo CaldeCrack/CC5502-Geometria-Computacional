@@ -1,4 +1,4 @@
-# Tarea 1 - Introducción a C++
+# Tarea 2 y 3 - Cerradura Convexa
 
 ### Estudiante: Andrés Calderón Guardia
 
