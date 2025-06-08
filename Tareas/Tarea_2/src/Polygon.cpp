@@ -1,4 +1,5 @@
-#include "Vector.cpp"
+#pragma once
+#include "Point.cpp"
 #include <algorithm>
 #include <vector>
 

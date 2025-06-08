@@ -1,15 +1,21 @@
+#pragma once
 #include "Polygon.cpp"
+
+enum orientation {
+  COLINEAL,
+  CW,
+  CCW,
+};
 
 template <typename T> class CHEstrategies {
 public:
-  // 0: colineal | 1: CW | 2: CCW
-  int orientation(Point<T> p, Point<T> q, Point<T> r) {
-    int val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
+  orientation orient(Point<T> p, Point<T> q, Point<T> r) {
+    T val = (q[1] - p[1]) * (r[0] - q[0]) - (q[0] - p[0]) * (r[1] - q[1]);
 
-    if (val == 0)
-      return 0;
-    return (val > 0) ? 1 : 2;
+    if (!val)
+      return COLINEAL;
+    return (val > 0) ? CW : CCW;
   }
 
-  Polygon<T> apply(Point<T> cloud[]);
+  Polygon<T> apply(Point<T> cloud[], int length);
 };

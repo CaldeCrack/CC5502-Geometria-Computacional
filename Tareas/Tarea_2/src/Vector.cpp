@@ -1,3 +1,4 @@
+#pragma once
 #include "Point.cpp"
 
 template <typename T> class Vector {

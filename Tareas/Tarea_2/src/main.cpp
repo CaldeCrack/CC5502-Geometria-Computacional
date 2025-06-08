@@ -1,51 +1,149 @@
 #include "GiftWrappingAlgorithm.cpp"
+#include "IncrementalAlgorithm.cpp"
+#include "RandomCHPoints.cpp"
+#include "RandomColinealPoints.cpp"
+#include "RandomPoints.cpp"
+#include <chrono>
+#include <fstream>
 
 using namespace std;
 
+// - Variables globales
+// Double
+GiftWrappingAlgorithm<double> gift;
+IncrementalAlgorithm<double> incremental;
+RandomPoints<double> randomPoints;
+RandomCHPoints<double> randomCHPoints;
+RandomColinealPoints<double> randomColinealPoints;
+
+// Integers
+GiftWrappingAlgorithm<int> intGift;
+IncrementalAlgorithm<int> intIncremental;
+RandomColinealPoints<int> intRandomColinealPoints;
+
+void experiment(int n, double k, std::ofstream &outfile) {
+  // Variables iniciales
+  double time;
+  auto start = std::chrono::high_resolution_clock::now();
+  auto end = std::chrono::high_resolution_clock::now();
+
+  // - Puntos aleatorios
+  Point<double> *points = randomPoints.generate(n, k);
+  string pointsType = "default";
+  if (k <= 0.03) { // Ejecutar solo para el primer k, el resto sería redundante
+    // Gift Wrapping
+    start = std::chrono::high_resolution_clock::now();
+    Polygon<double> giftCH = gift.apply(points, n);
+    end = std::chrono::high_resolution_clock::now();
+    time = (double)std::chrono::duration_cast<std::chrono::microseconds>(end -
+                                                                         start)
+               .count();
+    // Para este caso k = 0% en la cerradura convexa
+    outfile << pointsType << ",gift wrap," << n << ',' << giftCH.length()
+            << ",0," << time << '\n';
+
+    // Incremental
+    start = std::chrono::high_resolution_clock::now();
+    Polygon<double> incrementalCH = incremental.apply(points, n);
+    end = std::chrono::high_resolution_clock::now();
+    time = (double)std::chrono::duration_cast<std::chrono::microseconds>(end -
+                                                                         start)
+               .count();
+    // Para este caso k = 0% en la cerradura convexa
+    outfile << pointsType << ",incremental," << n << ','
+            << incrementalCH.length() << ",0," << time << '\n';
+  }
+
+  // - Puntos aleatorios con porcentaje k en la cerradura convexa
+  points = randomCHPoints.generate(n, k);
+  pointsType = "CC%";
+
+  // Gift Wrapping
+  start = std::chrono::high_resolution_clock::now();
+  Polygon<double> giftCH = gift.apply(points, n);
+  end = std::chrono::high_resolution_clock::now();
+  time =
+      (double)std::chrono::duration_cast<std::chrono::microseconds>(end - start)
+          .count();
+  outfile << pointsType << ",gift wrap," << n << ',' << giftCH.length() << ','
+          << k << ',' << time << '\n';
+
+  // Incremental
+  start = std::chrono::high_resolution_clock::now();
+  Polygon<double> incrementalCH = incremental.apply(points, n);
+  end = std::chrono::high_resolution_clock::now();
+  time =
+      (double)std::chrono::duration_cast<std::chrono::microseconds>(end - start)
+          .count();
+  outfile << pointsType << ",incremental," << n << ',' << incrementalCH.length()
+          << ',' << k << ',' << time << '\n';
+
+  // - Puntos aleatorios colineales
+  // Números enteros
+  Point<int> *intPoints = intRandomColinealPoints.generate(n, k);
+  pointsType = "colineal int";
+
+  // Gift Wrapping
+  start = std::chrono::high_resolution_clock::now();
+  Polygon<int> intGiftCH = intGift.apply(intPoints, n);
+  end = std::chrono::high_resolution_clock::now();
+  time =
+      (double)std::chrono::duration_cast<std::chrono::microseconds>(end - start)
+          .count();
+  outfile << pointsType << ",gift wrap," << n << ',' << intGiftCH.length()
+          << ',' << k << ',' << time << '\n';
+
+  // Incremental
+  start = std::chrono::high_resolution_clock::now();
+  Polygon<int> intIncrementalCH = intIncremental.apply(intPoints, n);
+  end = std::chrono::high_resolution_clock::now();
+  time =
+      (double)std::chrono::duration_cast<std::chrono::microseconds>(end - start)
+          .count();
+  outfile << pointsType << ",incremental," << n << ','
+          << intIncrementalCH.length() << ',' << k << ',' << time << '\n';
+
+  // Números reales
+  points = randomColinealPoints.generate(n, k);
+  pointsType = "colineal double";
+
+  // Gift Wrapping
+  start = std::chrono::high_resolution_clock::now();
+  giftCH = gift.apply(points, n);
+  end = std::chrono::high_resolution_clock::now();
+  time =
+      (double)std::chrono::duration_cast<std::chrono::microseconds>(end - start)
+          .count();
+  outfile << pointsType << ",gift wrap," << n << ',' << giftCH.length() << ','
+          << k << ',' << time << '\n';
+
+  // Incremental
+  start = std::chrono::high_resolution_clock::now();
+  incrementalCH = incremental.apply(points, n);
+  end = std::chrono::high_resolution_clock::now();
+  time =
+      (double)std::chrono::duration_cast<std::chrono::microseconds>(end - start)
+          .count();
+  outfile << pointsType << ",incremental," << n << ',' << incrementalCH.length()
+          << ',' << k << ',' << time << '\n';
+}
+
 int main() {
-  Point<double> p1(1.1, 2.2);
-  Point<double> p2(4.4, 5.5);
+  // CSV para guardar los tiempos
+  std::ofstream outfile("experiment.csv");
+  if (!outfile) {
+    std::cerr << "Fallo en abrir experiment.csv para escritura.\n";
+    return 1;
+  }
+  outfile << "Puntos,Algoritmo,Tamaño,Tamaño CC,CC%,Tiempo[μs]\n";
 
-  cout << "--- Puntos ---\n";
-  cout << "Point A: " << p1 << "\n";
-  cout << "Point B: " << p2 << "\n";
-  cout << "Distance: " << p1.dist(p2) << "\n";
-  cout << "Sum: " << p1 + p2 << "\n";
-  cout << "Scalar product (x2) of B: " << 2 * p2 << "\n";
-
-  Vector<double> v1(p1);
-  Vector<double> v2(p2);
-
-  cout << "\n--- Vectores ---\n";
-  cout << "Vector A: " << v1 << "\n";
-  cout << "Vector B: " << v2 << "\n";
-  cout << "Dot product: " << v1.dot_product(v2) << "\n";
-  cout << "Cross product: " << v1.cross_product(v2) << "\n";
-  cout << "Sum: " << v1 + v2 << "\n";
-  cout << "Scalar product (x3) of A: " << 3 * v1 << "\n";
-
-  cout << "\n--- Polígonos ---\n";
-
-  vector<Point<double>> vertices = {
-      Point<double>(0.9, 3.3), Point<double>(1.7, 5.4),
-      Point<double>(3.1, 7.2), Point<double>(5.2, 8.8),
-      Point<double>(4.5, 5.9), Point<double>(6.7, 4.5),
-      Point<double>(7.3, 2.9), Point<double>(5.8, 1.2),
-      Point<double>(2.1, 1.5)};
-  Polygon<double> poly(vertices);
-
-  cout << "Polígono: " << poly << "\n";
-  cout << "Cantidad de vértices: " << poly.length() << "\n";
-  cout << "Tercer vértice: " << poly[2] << "\n";
-  cout << "¿Es CCW?: " << boolalpha << poly.CCW() << "\n";
-  cout << "Área: " << poly.area() << "\n";
-
-  poly.CW2CCW();
-
-  cout << "\nPolígono pasó a sentido CCW\n";
-  cout << "Polígono: " << poly << "\n";
-  cout << "¿Es CCW?: " << boolalpha << poly.CCW() << "\n";
-  cout << "Área: " << poly.area() << "\n";
-
+  // Experimentación
+  std::cout << "- Ejecución actual:\n";
+  for (int exp = 2; exp <= 5; ++exp)
+    for (double k = 0.02; k <= 0.1; k += 0.02) {
+      std::cout << "n: 10^" << exp << " | k: " << k << '\n';
+      experiment((int)std::pow(10, exp), k, outfile);
+    }
+  outfile.close();
   return 0;
 }

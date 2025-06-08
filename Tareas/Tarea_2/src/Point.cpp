@@ -1,3 +1,4 @@
+#pragma once
 #include <cmath>
 #include <iostream>
 
@@ -14,7 +15,7 @@ public:
 
   // Getter
   const T &operator[](int i) const {
-    if (i == 0)
+    if (!i)
       return x;
     else if (i == 1)
       return y;
